@@ -14,4 +14,8 @@ edit this with knex commands from documentation
 create migration `knex migrate:make students` similarly...
 
 create DB by running `knex migrate:latest`
+can use `knex migrate:rollback` to rollback last set of migrations
+
+extra: make seeds `knex seed:make 001-name`
+`knex seed:run`
 
