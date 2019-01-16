@@ -1,16 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const db = require('./dbConfig');
+const db = require('../config/dbConfig');
 
 //middleware functions
-function checkBody (req,res,next) {
-    if(req.body.name){
-        next();
-    }
-    else{
-        res.status(400).json({message: `please provide a name field in the request`})
-    }
-}
+const middlewareFns = require('../middleware/middlewareFunctions');
+
 //endpoints
 router.get('/', (req,res,next) => {
     db('cohorts')
@@ -27,13 +21,12 @@ router.get('/:id', (req,res,next) => {
                 res.status(200).json(cohorts[0]);
             }
             else{
-                res.status(404).json({message: 'cohort not found'})
+                res.status(404).json({message: `cohort of id ${req.params.id} not found`})
             }
         })
         .catch(err => next(err));
 })
 
-//could add middleware to check to see if cohort actually exists first...
 router.get('/:id/students', (req,res,next) => {
     db('cohorts').join('students', 'students.cohort_id', '=', 'cohorts.id').where({'cohorts.id': req.params.id})
         .then(students => {
@@ -47,7 +40,7 @@ router.get('/:id/students', (req,res,next) => {
         .catch(err => next(err));
 })
 
-router.post('/', checkBody, (req,res,next) => {
+router.post('/', middlewareFns.checkBody, (req,res,next) => {
     db('cohorts').insert(req.body)
         .then(ids => {
             db('cohorts').where({id: ids[0]})
@@ -58,7 +51,7 @@ router.post('/', checkBody, (req,res,next) => {
         .catch(err => next(err))
 })
 
-router.put('/:id', checkBody, (req,res,next) => {
+router.put('/:id', middlewareFns.checkBody, (req,res,next) => {
     db('cohorts').where({id: req.params.id}).update(req.body)
         .then(count => {
             if(count){
@@ -90,13 +83,6 @@ router.delete('/:id', async (req,res,next) => {
     }
 })
 //catch error handler
-router.use( (err,req,res,next) => {
-if(err.errno === 19){
-    res.status(500).json({message: `name already used, please try another`})
-    }
-else {
-    res.status(500).json(err) 
-    }    
-});
+router.use(middlewareFns.errorHandler);
 
 module.exports = router;

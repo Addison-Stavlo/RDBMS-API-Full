@@ -1,8 +1,8 @@
 const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
-const cohortsRoute = require('./cohortsRoute.js');
-const studentsRoute = require('./studentsRoute.js');
+const cohortsRoute = require('./routes/cohortsRoute.js');
+const studentsRoute = require('./routes/studentsRoute.js');
 const server = express();
 
 //middleware

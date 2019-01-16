@@ -1,16 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const db = require('./dbConfig');
+const db = require('../config/dbConfig');
 
 //middleware functions
-function checkBody (req,res,next) {
-    if(req.body.name){
-        next();
-    }
-    else{
-        res.status(400).json({message: `please provide a name field in the request`})
-    }
-}
+const middlewareFns = require('../middleware/middlewareFunctions');
+
 //endpoints
 router.get('/', async (req,res,next) => {
     try{
@@ -37,7 +31,7 @@ router.get('/:id', async (req,res,next) => {
     }
 })
 
-router.post('/', checkBody, async (req,res,next) => {
+router.post('/', middlewareFns.checkBody, async (req,res,next) => {
     try{
         let ids = await db('students').insert(req.body);
         let newStudent = await db('students').where({id: ids[0]});
@@ -48,7 +42,7 @@ router.post('/', checkBody, async (req,res,next) => {
     }
 })
 
-router.put('/:id', checkBody, async (req,res,next) => {
+router.put('/:id', middlewareFns.checkBody, async (req,res,next) => {
     try{
         let count = await db('students').where({id: req.params.id}).update(req.body);
         if(count) {
@@ -81,13 +75,6 @@ router.delete('/:id', async (req,res,next) => {
 })
 
 //error handler
-router.use( (err,req,res,next) => {
-    if(err.errno === 19){
-        res.status(500).json({message: `name already used, please try another`})
-        }
-    else {
-        res.status(500).json(err) 
-        }    
-    });
+router.use(middlewareFns.errorHandler);
 
 module.exports = router;
