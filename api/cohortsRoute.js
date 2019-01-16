@@ -8,7 +8,7 @@ function checkBody (req,res,next) {
         next();
     }
     else{
-        res.status(400).json({message: 'please add a name field to the request'})
+        res.status(400).json({message: `please provide a name field in the request`})
     }
 }
 //endpoints
@@ -24,7 +24,7 @@ router.get('/:id', (req,res,next) => {
     db('cohorts').where({id: req.params.id})
         .then(cohorts => {
             if(cohorts.length){
-                res.status(200).json(cohorts);
+                res.status(200).json(cohorts[0]);
             }
             else{
                 res.status(404).json({message: 'cohort not found'})
@@ -92,7 +92,7 @@ router.delete('/:id', async (req,res,next) => {
 //catch error handler
 router.use( (err,req,res,next) => {
 if(err.errno === 19){
-    res.status(500).json({message: `name already used`})
+    res.status(500).json({message: `name already used, please try another`})
     }
 else {
     res.status(500).json(err) 
